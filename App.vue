@@ -1,6 +1,6 @@
 <template>
 	<div class="app">
-		<ScrollNumbers value="13123.3124" />
+		<ScrollNumbers :value="-29.5" />
 	</div>
 </template>
 

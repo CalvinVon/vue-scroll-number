@@ -2,12 +2,6 @@
 	<div class="scroll-number"
         :style="{ width: itemWidth +'px', height: itemHeight +'px' }">
 
-		<div class="number-item"
-            v-if="value === '.'"
-            :style="itemStyle">
-            <span>.</span>
-        </div>
-
 		<div class="scroll-list"
             ref="list"
             :style="{...listStyle, ...overrideStyle}">
@@ -104,18 +98,13 @@ export default {
 			immediate: true,
 			handler(newValue, oldValue) {
 				if (newValue !== undefined && oldValue !== undefined) {
-                    if (newValue === '.') {
-                        this.currentIndex = -1;
-                    }
-                    else {
-                        const handler = {
-                            [DIRECTIONS.FORWARD]: () => this.forwardTo(newValue),
-                            [DIRECTIONS.BACKWARD]: () => this.backwardTo(newValue),
-                        }[this.direction];
-                        nextFrame(() => {
-                            handler();
-                        });
-                    }
+                    const handler = {
+                        [DIRECTIONS.FORWARD]: () => this.forwardTo(newValue),
+                        [DIRECTIONS.BACKWARD]: () => this.backwardTo(newValue),
+                    }[this.direction];
+                    nextFrame(() => {
+                        handler();
+                    });
 				}
 			}
 		},
