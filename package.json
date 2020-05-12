@@ -1,6 +1,47 @@
 {
+  "name": "vue-scroll-numbers",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/index.js",
+  "scripts": {
+    "serve": "vue-cli-service serve example/entry.js",
+    "build:umd": "cross-env BABEL_ENV=umd babel src --out-dir lib",
+    "build:cjs": "cross-env BABEL_ENV=cjs babel src --out-dir es",
+    "build:dist": "cross-env BABEL_ENV=umd webpack --config webpack.config.js",
+    "test:unit": "vue-cli-service test:unit"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CalvinVon/vue-scroll-number.git"
+  },
+  "keywords": [
+    "vue",
+    "scroll number",
+    "vue-scroll-number"
+  ],
+  "author": "calvin_von",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/CalvinVon/vue-scroll-number/issues"
+  },
+  "homepage": "https://github.com/CalvinVon/vue-scroll-number#readme",
   "devDependencies": {
+    "@babel/cli": "^7.8.4",
+    "@babel/core": "^7.9.6",
+    "@babel/preset-env": "^7.9.6",
+    "@vue/cli-service": "^4.3.1",
+    "babel-loader": "^8.1.0",
+    "core-js": "3.6.5",
+    "cross-env": "^7.0.2",
+    "css-loader": "^3.5.3",
     "node-sass": "^4.14.1",
-    "sass-loader": "^8.0.2"
+    "postcss-loader": "^3.0.0",
+    "sass-loader": "^8.0.2",
+    "vue": "^2.6.11",
+    "vue-loader": "^15.9.2",
+    "vue-template-compiler": "^2.6.11",
+    "webpack": "^4.43.0",
+    "webpack-cli": "^3.3.11",
+    "webpack-dev-server": "^3.11.0"
   }
 }
