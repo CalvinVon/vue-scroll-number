@@ -6,7 +6,7 @@
     .digit {
         display: inline-block;
         vertical-align: text-bottom;
-        font-size: 14px;
+        font-size: $font-size;
         text-align: center;
     }
 }
@@ -34,6 +34,6 @@
 	}
 	.number-item {
 		text-align: center;
-		font-size: 14px;
+		font-size: $font-size;
 	}
 }

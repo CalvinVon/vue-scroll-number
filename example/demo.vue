@@ -24,7 +24,7 @@ export default {
 	},
 	methods: {
 		generateValue() {
-			return '-'+[...new Array((Math.random() * 3 >> 0) + 1).keys()]
+			return ''+[...new Array((Math.random() * 3 >> 0) + 1).keys()]
 				.map(() => Math.random() * 9 >> 0)
 				.join('');
 		},

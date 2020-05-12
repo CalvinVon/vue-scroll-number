@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import demo from './demo';
 import ScrollNumbers from '../src';
-import './override-variables.scss';
+import './custom-variables.scss';
 
 Vue.use(ScrollNumbers, { transitionTime: 1000 });
 
