@@ -1,6 +1,6 @@
 @import './variables';
 
-.scroll-numbers {
+.scroll-number {
     display: inline-block;
     font-size: 0;
     .digit {
@@ -11,7 +11,7 @@
     }
 }
 
-.scroll-number {
+.scroll-number-item {
 	display: inline-block;
 	position: relative;
 	width: 15px;

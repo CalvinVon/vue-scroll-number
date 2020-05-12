@@ -1,9 +1,9 @@
 import Vue from 'vue';
 import demo from './demo';
-import ScrollNumbers from '../src';
+import ScrollNumber from '../src';
 import './custom-variables.scss';
 
-Vue.use(ScrollNumbers, { transitionTime: 1000 });
+Vue.use(ScrollNumber, { transitionTime: 400 });
 
 new Vue({
     render: h => h(demo)
