@@ -81,7 +81,7 @@ export default {
             this.process = this.process.then(() => {
                 return new Promise(resolve => {
                     this.innerValue = value;
-                    this.$nextTick(() => {
+                    setTimeout(() => {
                         const p = this.getNumbers(value)
                             .filter(isNumber)
                             .map((item, index) => {

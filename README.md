@@ -1,25 +1,25 @@
-# vue-mount
-A tool for dynamic mounting Vue components and maintaining the component tree.
+# vue-scroll-number
+一个带有动画顺序控制的数字上下滚动 Vue 2.x 组件
 
-[![version](https://img.shields.io/npm/v/vue-mount.svg)](https://www.npmjs.com/package/vue-mount)
-[![](https://img.shields.io/npm/dt/vue-mount.svg)](https://github.com/CalvinVon/vue-mount)
-[![](https://img.shields.io/github/size/CalvinVon/vue-mount/dist/vue-mount.min.js.svg?label=minified%20size)](https://github.com/CalvinVon/vue-mount/blob/master/dist/vue-mount.min.js)
-[![dependencies](https://img.shields.io/david/CalvinVon/vue-mount.svg)](https://www.npmjs.com/package/vue-mount)
+[![version](https://img.shields.io/npm/v/vue-scroll-number.svg)](https://www.npmjs.com/package/vue-scroll-number)
+[![](https://img.shields.io/npm/dt/vue-scroll-number.svg)](https://github.com/CalvinVon/vue-scroll-number)
+[![](https://img.shields.io/github/size/CalvinVon/vue-scroll-number/dist/vue-scroll-number.min.js.svg?label=minified%20size)](https://github.com/CalvinVon/vue-scroll-number/blob/master/dist/vue-scroll-number.min.js)
+[![dependencies](https://img.shields.io/david/CalvinVon/vue-scroll-number.svg)](https://www.npmjs.com/package/vue-scroll-number)
 
 [中文文档](README_zh.md) | English
 
 ## Demos
-- [preview](https://vue-mount-demo.stackblitz.io/)
-- [via NPM](https://stackblitz.com/edit/vue-mount-demo?file=App.js)
-- [via CDN](https://jsbin.com/hojadorago/1/edit?html,js,output)
+- [效果预览](https://xvltz.csb.app/)
+- [工程化用法](https://codesandbox.io/s/vue-scroll-number-xvltz)
+- [CDN用法](https://jsbin.com/hojadorago/1/edit?html,js,output)
 
 # Table of contents
-- [Getting Started](#Getting-Started)
-    - [Install](#Install)
-- [Usage](#Usage)
-    - [Basic usage](#Basic-usage)
-    - [Advanced usage](#Advanced-usage)
-- [MountOption](#MountOption)
+- [开始](#开始)
+    - [安装](#安装)
+- [用法](#用法)
+    - [基本用法](#基本用法)
+    - [高级用法](#高级用法)
+- [全局配置项](#全局配置项)
     - [target](#target)
     - [mode](#mode)
     - [root](#root)
@@ -27,128 +27,121 @@ A tool for dynamic mounting Vue components and maintaining the component tree.
     - [props](#props)
     - [data](#data)
     - [on](#on)
-    - [watch](#watch)
-- [Methods](#Methods)
+- [实例方法](#实例方法)
     - [getInstance(MountOptions)](#getInstanceMountOptions)
     - [mount(MountOptions)](#mountMountOptions)
     - [set(MountDataOptions)](#setMountDataOptions)
     - [destroy()](#destroy)
     - [getDom()](#getDom)
-- [Methods added on components](#Methods-added-on-components)
+- [在组件上添加的方法](#在组件上添加的方法)
     - [$getMount()](#getMount)
-- [Known issues](#known-issues)
-    - [Unable to access $router/$store](#Unable-to-access-routerstore)
+- [已知的问题](#已知的问题)
+    - [无法访问到 `$router`/`$store`](#无法访问到-routerstore)
 - [CHANGELOG](#CHANGELOG)
 
----
-
-# Getting Started
-### Install
-You can install the library via npm.
+# 开始
+### 安装
+你可以通过 `npm` 来安装。
 ```bash
-npm i vue-mount -S
+npm i vue-scroll-number -S
 ```
-or via yarn:
+或者通过 `yarn` 安装：
 ```bash
-yarn add vue-mount
+yarn add vue-scroll-number
 ```
 
-or via CDN
+还可以直接使用 `CDN` 方式引入
+> 先决条件：该方式必须先要引入完整 `Vue`，或者在 `window` 对象上暴露出 `Vue` 构造函数。
 ```html
-<!-- import Vue. -->
+<!-- 首先要引入 Vue -->
+<!-- 可以在 `window.Vue` 中拿到 `Vue` 构造函数 -->
 <script src="https://cdn.jsdelivr.net/npm/vue@2.6.10/dist/vue.js"></script>
 
-<!-- import vue-mount -->
-<script src="https://cdn.jsdelivr.net/npm/vue-mount/dist/vue-mount.min.js"></script>
+<!-- 引入 vue-scroll-number -->
+<script src="https://cdn.jsdelivr.net/npm/vue-scroll-number/dist/vue-scroll-number.min.js"></script>
 <script>
-    var mount = window['VueMount'].mount;
-    var Mount = window['VueMount'].default;
+    var VueScrollNumber = window['VueScrollNumber'].default;
 </script>
 ```
 
----
 
-# Usage
-### Basic usage
+# 用法
+### 基本用法
+
+全局引入或者使用组件引入，在入口文件处：
 ```js
-import { mount } from "vue-mount";
-// just import a single file component
-import Alert from "./alert.vue";
+import Vue from 'vue';
+import ScrollNumber from "vue-scroll-number";
 
-// mount component and return instance
-const alert = mount(Alert);
+Vue.use(ScrollNumber);
 ```
 
-### Advanced usage
-```js
-// The exposed method `mount(cmp, opt)` is the syntactic sugar of `new Mount(cmp, opt).mount()`
-import Mount from "vue-mount";
-// alert.vue is a common `single file component`
-import Alert from "./alert.vue";
+组件内使用：
+```html
+<template>
+    <ScrollNumber :value="number" ref="scrollNumber" />
+</template>
 
-const mountAlert = new Mount(Alert, {
-    // mount target.
-    // the special value indicates create a new root vue instance
-    target: 'new',
-    // props data passed to component
-    props: {
-        content: 'Mount alert component to a new Vue root instance'
-    },
-    // modify component data
-    data: {
-        someInnerData: 'modified'
-    },
-    // attach event listeners
-    on: {
-        'some-event'(eventData, vm, mnt) {
-            // vm is a component instance
-            // mnt is current Mount instance
+<script>
+export default {
+    data() {
+        return {
+            number: 12138
         }
     },
-    watch: {
-        content: {
-            immediate: true,
-            handler(newValue, oldValue, vm, mnt) {
-                console.log('Content has changed: ' + newValue);
-                // do unwatch
-                // make sure the unwatch method exsit while `immediate` is true
-                if (mnt.unwatchMapper.content) {
-                    mnt.unwatchMapper.content();
-                }
-            }
+    methods: {
+        changeValue() {
+            this.value = 888;
+        },
+        changeValueByRef() {
+            this.$refs.scrollNumber.changeTo(666);
         }
     }
-});
-
-// Get alert component instance
-let alertVm = mountAlert.getInstance();
-// Mount alert component
-// Component would not be mounted more than once
-alertVm = mountAlert.mount();
-
-// Dynamicly set props data of the component.
-mountAlert.set({
-    props: { content: 'Props changed' }
-});
-// Destroy component and it's element
-mountAlert.destroy();
-
-// New component would be mounted
-alertVm = mountAlert.mount();
+}
+</script>
 ```
 
+### 定制选项
+可全局配置 **ScrollNumber** 组件的行为
+```js
+// 将动画时间设为 400 ms
+Vue.use(ScrollNumber, { transitionTime: 400 });
+```
+
+同时需要覆盖内置的样式，新建一个如 `custom-variables.scss` 的文件：
+```scss
+$font-size: 24px;
+$transition-time: 0.4s;
+$transition-timing-function: cubic-bezier(0.22, 0.61, 0.36, 1);
+
+@import '~vue-scroll-number/src/style/variables.scss';
+@import '~vue-scroll-number/src/style/index.scss';
+```
+
+在入口文件引入：
+```js
+import ScrollNumber from 'vue-scroll-number';
+import './custom-variables.scss';
+
+Vue.use(ScrollNumber, { transitionTime: 400 });
+```
+
+### 动画顺序控制
+**vue-scroll-number** 将自动缓冲每一次变化，并用流畅的动画按顺序表现出来。
+
+在代码中，每一次改变状态（或者调用方法）都将返回一个 `Promise` 对象，并保存在组件的 `process` 属性值上。
+####
 ---
 
-
-# MountOption
+# MountOption 配置项
 ## **`target`**
-- **Type:** { string | **Element** | **Vue** | **VNode** }
-- **Default:** `new`
-- **Details:** You can pass `css selector`, `Element`, `Vue instance`, `VNode` or special value including `new` and `root`
-    - **`new`:** default value. Vue component would be mounted with a new Vue root instance.
-    - **`root`:** Vue component would be mounted to an existing Vue root instance. if the root instance or root element is not found under `MountOption.root` option, the component would be mounted with a new Vue root instance behaving just like option `new`.
-    - When giving a `Vue instance`, the component would **replace/append** the Vue instance and added to the components tree(see [MountOption.mode](#mode)), former Vue instance would be destroyed when the component is mounted.
-- **Examples:**
+- **类型:** { string | **Element** | **Vue** | **VNode** }
+- **默认值:** `new`
+- **说明:** 你可以传入 `css selector`, `Element`, `Vue instance`, `VNode` 或者是包括 `new` 和 `root` 的特殊预设值。
+    - **`new`:** 默认特殊预设值. Vue 组件实例会被挂载到一个**新创建的 Vue 根实例**上。
+    - **`root`:** Vue 组件实例将被挂载到**现有的 Vue 根实例**上。 *如果在 `MountOption.root` 选项下找不到根实例或根元素，组件实例将被挂载到一个新的 Vue 根实例上，其行为将与选项 `new` 相似*。
+    - 当传入一个 `Vue 实例对象` 时，新的组件实例将会**替换/追加到**传入的实例（具体参见 [`MountOption.mode`](#mode) 配置），并且在 Vue 组件树上更新。 当新的组件实例挂载时，传入的实例将会被销毁。
+- **用例:**
     ```js
     mount(Alert, { target: "root" };
     mount(Alert, { target: "#target" };
@@ -156,36 +149,37 @@ alertVm = mountAlert.mount();
     mount(Alert, { target: this.$refs.component };
     mount(Alert, { target: this.$refs.component.$slots.default[0] };
     ```
+    
+> **特别注意**：当配置为 `new` 时，挂载的组件无法访问到创建根实例时传入的配置，导致在挂载的组件内无法访问 `this.$router` 等在根组件上全局注册的配置（原因是创建了一个新的根实例，但是存在[替代方案](#无法访问到-routerstore)）；其他情况下，`vue-scroll-number` 会自动查询并加入组件树上下文。
 
-> **Special Note**: When configured as `new`, the mounted component cannot access the configuration passed in the root instance, resulting in the mounted component UNABLE to access configuration globally registered on the root component such as `this.$router` (because a new root instance was created, but there is [alternative](#Unable-to-access-routerstore)); In other cases, `vue-mount` will automatically query and join the component tree context.
 
 ## **`mode`**
-- **Type:** { string }
-- **Default:** `replace`
-- **Options:** `replace`, `append`
-- **Details:** Specific the mount mode. Corresponds to the behavior on its component tree.
-- **Examples:**
+- **类型:** { string }
+- **默认值:** `replace`
+- **备选项:** `replace`, `append`
+- **说明:** 指定挂载方式：`替换` 和 `追加` 模式。对应到其组件树上的行为。
+- **用例:**
     ```js
-    // Alert component would be append to current component
+    // Alert 组件实例将会被追加挂载到当前组件（this）上。
     mount(Alert, { 
         target: this,
         mode: 'append'
     });
     ```
 
-> **Attention**: When the value of option `target` is `new`, or `root`, option `mode` will be ignored and be reset to `append`.
+> 值得注意的是：当配置项 `target` 值为 `new` 或者 `root` 时，`mode` 将被忽略并重置成 `append`。
 
 
 ## **`root`**
-- **Type:** { string | **Element** | **Vue** | **VNode** }
-- **Default:** `#app`
-- **Details:** Specific a root element. (All values given will be parsed to be an HTML element)
+- **类型:** { string | **Element** | **Vue** }
+- **默认值:** `#app`
+- **说明:** 指定当前应用的根元素.(所有给出的值在内部都将被解析为HTML元素)。
 
 ## **`rootOptions`**
-- **Type:** { VueOptions }
-- **Default:** `{}`
-- **Details:** Specific the Vue contructor options when creating new vue root instance
-- **Examples:**
+- **类型:** { VueOptions }
+- **默认值:** `{}`
+- **说明:** 允许指定在创建新的 Vue 根实例时的构造选项。
+- **用例:**
     ```js
     mount(Alert, {
         rootOptions: {
@@ -199,25 +193,25 @@ alertVm = mountAlert.mount();
     ```
 
 ## **`props`**
-- **Type:** { Object }
-- **Details:** Specific component props data.
+- **类型:** { Object }
+- **说明:** 指定传入组件的 props 值。
 
 ## **`data`**
-- **Type:** { Object }
-- **Details:** Modify component data after the component instance was created (mounted is not necessary).
+- **类型:** { Object }
+- **说明:** 指定的值将会在实例创建完毕（也可能未挂载）时修改组件内部响应式数据。
 
 ## **`on`**
-- **Type:** { [event: string]: Function | Object }
-- **Details:** Attach event listener to the component instance.
-    - **build-in** event:
-        - `mount:mount`: Triggered when calling `mount` method or ready to mount component。
-        - `mount:destroy`: Triggered when (underlying) calling `destroy` method.
-    - **Object configure**:
-        - `once` { Boolean }: Whether the listener will be removed once it triggers for the first time.
-        - `handler` { Function }: The event callback function. Compared to event callback function of Vue ([vm.$on/$once](https://vuejs.org/v2/api/index.html#vm-on)), the last two additional arguments are current `Vue component` and current `Mount instance`.
+- **类型:** { [event: string]: Function | Object }
+- **说明:** 将事件侦听器附加到组件实例。
+    - **内置** 事件:
+        - `mount:mount`: 在调用 `mount` 方法或准备挂载组件时触发。
+        - `mount:destroy`: 触发​​何时（底层）调用 `destroy` 方法
+    - 当传入**配置对象**:
+        - `once` { Boolean }: 是否在第一次触发时删除侦听器（只触发一次）。
+        - `handler` { Function }: 事件触发回调函数.与 Vue 的事件回调函数 ([vm.$on/$once](https://vuejs.org/v2/api/index.html#vm-on))相比，会在参数列表后追加两个辅助参数，`当前组件实例` 和 `当前 Mount 实例`。
 
-        > The `this` argument of the callback function points to the current **Mount instance**, although you can use the **arrow function** to avoid this behavior.
-- **Examples:**
+        > 回调函数的 `this` 指向为**当前的 Mount 实例**，当然你可以使用**箭头函数**来避免这一行为。
+- **用例:**
     ```js
     mount(Alert, {
         on: {
@@ -242,16 +236,16 @@ alertVm = mountAlert.mount();
     ```
 
 ## **`watch`**
-- **Type:** { [key: string]: Function | Object }
-- **Details:** An object where keys are expressions to watch and values are the corresponding callbacks. The value can also be a string of a method name, or an Object that contains additional options.
-    - **Object configure**:
+- **类型:** { [key: string]: Function | Object }
+- **说明:** 一个对象，键是需要观察的表达式，值是对应回调函数。值也可以是方法名，或者包含选项的对象。
+    - 当传入**配置对象**:
         - `immediate` { Boolean }: Passing in `immediate: true` in the option will trigger the callback immediately with the current value of the expression.
-        - `deep` { Boolean }: To also detect nested value changes inside Objects, you need to pass in `deep: true` in the options argument.
-        - `handler` { Function }: The callback function when the value changes. Compared to the callback function of Vue ([vm.$watch](https://vuejs.org/v2/api/index.html#vm-watch)), there are always be 4 parameters like: `newValue, oldValue, vm, mnt`. The last two additional arguments are current `Vue component` and current `Mount instance`.
+        - `deep` { Boolean }: 为了发现对象内部值的变化，可以在选项参数中指定 deep: true 。注意监听数组的变动不需要这么做。
+        - `handler` { Function }: 值更改时的回调函数。与 Vue 的回调函数（[vm.$watch](https://vuejs.org/v2/api/index.html#vm-watch)）相比，此回调函数通常有4个参数，如：newValue、oldValue、vm、mnt。最后两个辅助参数是：`当前组件实例` 和 `当前 Mount 实例`。
 
-        > The `this` argument of the callback function points to the current **Mount instance**, although you can use the **arrow function** to avoid this behavior.
-    - **Unwatch**: Each key you passed in the `watch` option will be added to the attribute `unwatchMapper` of Mount instance, you can call the method like `mnt.unwatchMapper.attr()` to unwatch it.
-- **Examples:**
+        > 回调函数的 `this` 指向为**当前的 Mount 实例**，当然你可以使用**箭头函数**来避免这一行为。
+    - **Unwatch**: 传给 `watch` 选项每个键都将添加到 Mount 实例的属性 `unwatchMapper` 中，您可以调用类似 `mnt.unwatchMapper.attr()` 的方法来取消监听。
+- **用例:**
     ```js
     mount(Alert, {
         watch: {
@@ -261,8 +255,8 @@ alertVm = mountAlert.mount();
             attr: {
                 handler(newValue, oldValue, vm, mnt) {
                     console.log(args);
-                    // do unwatch
-                    // make sure the unwatch method exsit while `immediate` is true
+                    // 取消 watch
+                    // 当 `immediate` 为 true 时，需要确保取消函数存在
                     if (mnt.unwatchMapper.content) {
                         mnt.unwatchMapper.content();
                     }
@@ -272,72 +266,74 @@ alertVm = mountAlert.mount();
         }
     })
     ```
-> Attention: Only **declare the data upfront** in the `data` option, the callback function can be called.
+> 注意：只有在 `data` 选项中**提前声明数据**，值变化时监听回调函数才能被正常调用。
 
 
-# Methods
+
+---
+
+
+# 实例方法
 ## **`getInstance(MountOptions)`**
-- **Arguments:** { MountOptions }
-- **Returns:** { Vue }
-- **Details:** Return a vue component instance, calling the method multiple times will returns the same instance
-> **Attention**: When the value of option `target` is `root` while no root instance/element was found(which means need to create a new Vue instance), or `target` is `new`, they all lead to the result that instance would be mounted right now.
+- **参数:** { MountOptions }
+- **返回:** { Vue }
+- **说明:** 返回一个 vue 组件实例。多次调用该方法只会创建实例一次，且将返回相同的实例。
+> 注意：当选项 `target` 的值是 `root`, 且没有找到根实例/元素时（这种情况将导致*创建一个新的 Vue 根实例*）或者当值为 `new` 时，两种情况都将导致组件实例会被立即挂载。
 
-> In order to ensure behavioral consistency, it is recommended to use the [`#mount`](#mountMountOptions) method first.
+> 值得注意：为了确保行为一致性，推荐优先使用 [`#mount`](#mountMountOptions) 方法。
 
 ## **`mount(MountOptions)`**
-- **Arguments:** { MountOptions }
-- **Returns:** { Vue }
-- **Details:** Mount Vue component, update the component tree and return a Vue component instance.
-> Calling the method after the component was destroyed will **re-mount** the component.
+- **参数:** { MountOptions }
+- **返回:** { Vue }
+- **说明:** 挂载 Vue 组件、更新组件树并返回 Vue 组件实例。
+> 若在组件已被 `destroy` 之后再次调用该方法将重新装载该组件（你可以认为 mount 实例为组件工厂）。
 
-> Calling the method multiple times will **ONLY mount once**
+> 多次调用该方法只会挂载实例一次，且将返回相同的实例。
+
 
 ## **`set(MountDataOptions)`**
-- **Arguments:** { MountDataOptions }
-- **Returns:** { Mount } Current instance of `Mount`.
-- **Details:** Dynamicly set `props`, `data` and `listeners` of the component.
+- **参数:** { MountDataOptions }
+- **返回:** { Mount } 当前 `Mount` 实例。
+- **说明:** 动态设置组件实例的 `props`、 `data` 和 `listeners`。
 
 ## **`destroy()`**
-- **Returns:** { Vue }
-- **Details:** Destroy the Vue component instance and remove the associated elements. Diff from Vue's [$destroy](https://cn.vuejs.org/v2/api/#vm-destroy) method.
-
+- **返回:** { Vue }
+- **说明:** 销毁 Vue 组件实例并删除关联的元素，并更新组件树。与 Vue 的 [$destroy](https://cn.vuejs.org/v2/api/#vm-destroy) 方法不同，销毁整个组件与其 DOM。
 
 ## **`getDom()`**
-- **Returns:** { Element | Node }
-- **Details:** Returns the element associated with the component.
+- **返回:** { Element | Node }
+- **说明:** 返回组件实例相关联的 DOM。
+
 
 ---
 
-# Methods added on components
+# 在组件上添加的方法
 ## **`$getMount()`**
-- **Returns:** { VueMount }
-- **Details:** returns the VueMount instance associated with the component instance.
-
+- **返回:** { VueScrollNumber }
+- **说明:** 返回组件实例相关联的 VueScrollNumber 实例。
 
 ---
 
-# Known issues
-## Unable to access `$router`/`$store`
+# 已知的问题
+## 无法访问到 `$router`/`$store`
 
-- When VueMount mounts the component to **a new Vue root instance**, the component will not be able to obtain the `$router`/ `$store` and other attributes ([reason](#target)) configured in the original root component. Of course, there are the following ways to solve this problem.
-
+- 当 VueScrollNumber 将组件挂载到**新的 Vue 根实例**上时，该组件将无法获取到在原根组件配置的 `$router`/`$store` 等属性（[原因](#target)），当然也有以下方式来解决该问题。
 
     ```js
     mount(Component, {
         ...
         data: {
             $store: this.$store,
-            // Why not $router? VueRouter uses the object.defineProperty method internally and only sets the getter property, so this value cannot be overridden
+            // 为什么不是 $router? VueRouter 在内部使用了 Object.defineProperty 方法并只设置了 getter 属性，故在该组件无法覆盖这个值
             router: this.$router,
             ...
         },
         ...
     });
     ```
-    Then you can use `this.$store` / `this.router` inside the component to access.
+    随后可在组件内部使用 `this.$store`/`this.router` 来得到该值。
 
-- When the component has been mounted on the original root instance, but the value cannot be obtained in the component's `created` / `mounted` lifecycle hooks, you need to use VueMount [built-in event](#on) to solve the problem:
-
+- 当组件已经挂载在原根实例上，但在组件的 `created`/`mounted` 等生命周期内获取不到该值时，需要使用 VueScrollNumber [内置的事件](#on) 来解决：
     ```js
     mount(Component, {
         ...
@@ -350,6 +346,6 @@ alertVm = mountAlert.mount();
         ...
     }
     ```
-
+    原因是现版本 VueScrollNumber 在内部统一在组件挂载之后才计算父组件取值。
 ---
 # [CHANGELOG](./CHANGELOG.md)

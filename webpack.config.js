@@ -1,11 +1,13 @@
 const path = require('path');
 const webpack = require('webpack');
 const VueLoaderPlugin = require('vue-loader/lib/plugin');
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 
 module.exports = {
     mode: 'production',
     entry: {
-        'vue-scroll-numbers': './src/index.js'
+        'vue-scroll-number': './src/index.js'
     },
     externals: {
         'vue': 'Vue'
@@ -14,7 +16,7 @@ module.exports = {
         path: path.resolve(__dirname, './dist'),
         filename: '[name].min.js',
         libraryTarget: 'umd',
-        library: 'VueScrollNumbers',
+        library: 'VueScrollNumber',
         globalObject: 'typeof self !== \'undefined\' ? self : this',
     },
     resolve: {
@@ -31,6 +33,7 @@ module.exports = {
                 test: /\.scss$/,
                 exclude: /node_modules/,
                 loader: [
+                    MiniCssExtractPlugin.loader,
                     "css-loader",
                     "sass-loader",
                 ]
@@ -45,7 +48,11 @@ module.exports = {
     plugins: [
         new VueLoaderPlugin(),
         new webpack.BannerPlugin({
-            banner: `vue-scroll-numbers v${require('./package.json').version}\n(c) ${new Date().getFullYear()} Calvin Von\nReleased under the MIT License.`
-        })
+            banner: `vue-scroll-number v${require('./package.json').version}\n(c) ${new Date().getFullYear()} Calvin Von\nReleased under the MIT License.`
+        }),
+        new MiniCssExtractPlugin({
+            filename: "[name].css"
+        }),
+        new CleanWebpackPlugin()
     ]
 }
