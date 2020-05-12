@@ -1,15 +1,15 @@
 <template>
 	<div class="scroll-number"
-        :style="{ width: itemWidth +'px', height: itemHeight +'px' }">
+		:style="{ width: itemWidth +'px', height: itemHeight +'px' }">
 
 		<div class="scroll-list"
-            ref="list"
-            :style="{...listStyle, ...overrideStyle}">
+			ref="list"
+			:style="{...listStyle, ...overrideStyle}">
 			<ul class="number-list padding-number-list">
 				<li v-for="(num, index) in backwardPaddingNumbers"
 					:key="'real-' + index">
 					<div class="number-item"
-                        :style="itemStyle">
+						:style="itemStyle">
 						<span>{{ numbers[index] + numbers.length - backwardPaddingNumbers.length }}</span>
 					</div>
 				</li>
@@ -20,7 +20,7 @@
 				<li v-for="(num, index) in numbers"
 					:key="'real-' + index">
 					<div class="number-item"
-                        :style="itemStyle">
+						:style="itemStyle">
 						<span>{{num}}</span>
 					</div>
 				</li>
@@ -30,7 +30,7 @@
 				<li v-for="(num, index) in forwardPaddingNumbers"
 					:key="'real-' + index">
 					<div class="number-item"
-                        :style="itemStyle">
+						:style="itemStyle">
 						<span>{{num}}</span>
 					</div>
 				</li>
@@ -40,23 +40,24 @@
 </template>
 
 <script>
+import { getOptions } from './options';
 const DIRECTIONS = {
 	'FORWARD': 'FORWARD',
 	'BACKWARD': 'BACKWARD',
 };
-const transitionTime = 800;
-const nextFrame = cb => requestAnimationFrame(cb);
-const nextTransition = cb => setTimeout(cb, transitionTime);
 
 export default {
 	name: "scroll-number",
 	props: {
-		value: [Number, String],
 		direction: {
 			type: String,
 			validator(value) {
 				return !!DIRECTIONS[value];
 			}
+		},
+		transitionTime: {
+			type: Number,
+			default: () => getOptions().transitionTime
 		},
 		itemStyle: Object
 	},
@@ -65,10 +66,10 @@ export default {
 			numbers: [...new Array(10).keys()],
 			forwardPaddingNumbers: [],
 			backwardPaddingNumbers: [],
-			formerValue: this.value,
 			itemSize: {},
 
-			currentIndex: -1,
+			value: 0,
+			currentIndex: 0,
 			overrideStyle: {},
 
 			process: Promise.resolve()
@@ -94,20 +95,6 @@ export default {
 		},
 	},
 	watch: {
-		value: {
-			immediate: true,
-			handler(newValue, oldValue) {
-				if (newValue !== undefined && oldValue !== undefined) {
-                    const handler = {
-                        [DIRECTIONS.FORWARD]: () => this.forwardTo(newValue),
-                        [DIRECTIONS.BACKWARD]: () => this.backwardTo(newValue),
-                    }[this.direction];
-                    nextFrame(() => {
-                        handler();
-                    });
-				}
-			}
-		},
 		itemStyle() {
 			this.$nextTick(() => {
 				this.calcItemSize();
@@ -115,29 +102,24 @@ export default {
 		}
 	},
 	created() {
-		this.currentIndex = this.numbers.indexOf(+this.value) || -1;
+		this.currentIndex = this.numbers.indexOf(+this.value);
 	},
 	mounted() {
 		this.calcItemSize();
 	},
 	methods: {
-		calcItemSize() {
-			this.itemSize = this.$refs.realList.querySelector('span').getBoundingClientRect();
-		},
-		moveWithoutAnimation(cb) {
-			this.overrideStyle = {
-				transition: 'none'
-			};
-			cb();
-			nextFrame(() => {
-				this.overrideStyle = {};
-			});
+		changeTo(value) {
+			const handler = {
+				[DIRECTIONS.FORWARD]: () => this.forwardTo(value),
+				[DIRECTIONS.BACKWARD]: () => this.backwardTo(value),
+			}[this.direction];
+			return handler();
 		},
 		forwardTo(newValue) {
 			const p = () => new Promise(resolve => {
-				const oldValue = this.formerValue;
+				const oldValue = this.value;
 				const finish = () => {
-					nextTransition(() => {
+					this.nextTransition(() => {
 						resolve(newValue);
 					});
 				};
@@ -148,17 +130,17 @@ export default {
 					diff += 10;
 					this.forwardPaddingNumbers = [...new Array(newValue + 1).keys()];
 					this.currentIndex += diff;
-					nextTransition(() => {
+					this.nextTransition(() => {
 						this.moveWithoutAnimation(() => {
 							this.currentIndex = this.currentIndex % this.numbers.length;
 							finish();
-							this.formerValue = newValue;
+							this.value = newValue;
 						});
 					});
 				} else {
 					this.currentIndex += newValue - oldValue;
 					finish();
-					this.formerValue = newValue;
+					this.value = newValue;
 				}
 			});
 			this.process = this.process.then(p);
@@ -166,9 +148,9 @@ export default {
 		},
 		backwardTo(newValue) {
 			const p = () => new Promise(resolve => {
-				const oldValue = this.formerValue;
+				const oldValue = this.value;
 				const finish = () => {
-					nextTransition(() => {
+					this.nextTransition(() => {
 						resolve(newValue);
 					});
 				};
@@ -180,21 +162,42 @@ export default {
 					this.backwardPaddingNumbers = [...new Array(this.numbers.length - newValue).keys()];
 					diff = this.backwardPaddingNumbers.length;
 					this.currentIndex = -diff;
-					nextTransition(() => {
+					this.nextTransition(() => {
 						this.moveWithoutAnimation(() => {
 							this.currentIndex = newValue;
 							finish();
-							this.formerValue = newValue;
+							this.value = newValue;
 						});
 					});
 				} else {
 					this.currentIndex += newValue - oldValue;
 					finish();
-					this.formerValue = newValue;
+					this.value = newValue;
 				}
 			});
 			this.process = this.process.then(p);
 			return this.process;
+		},
+
+		nextFrame(cb) {
+			setTimeout(() => {
+				requestAnimationFrame(cb);
+			}, 1000 / 60);
+		},
+		nextTransition(cb) {
+			setTimeout(cb, this.transitionTime)
+		},
+		calcItemSize() {
+			this.itemSize = this.$refs.realList.querySelector('span').getBoundingClientRect();
+		},
+		moveWithoutAnimation(cb) {
+			this.overrideStyle = {
+				transition: 'none'
+			};
+			cb();
+			this.nextFrame(() => {
+				this.overrideStyle = {};
+			});
 		},
 	},
 };
@@ -203,35 +206,3 @@ export {
 	DIRECTIONS
 }
 </script>
-
-<style lang="scss">
-$transition-time: 0.8s;
-
-.scroll-number {
-	display: inline-block;
-	position: relative;
-	width: 15px;
-	height: 30px;
-	overflow: hidden;
-
-	.scroll-list {
-		position: absolute;
-		width: 100%;
-		transition: transform $transition-time ease;
-
-		ul {
-			margin: 0;
-			padding: 0;
-			list-style: none;
-			margin-block-start: 0;
-			margin-block-end: 0;
-			padding-inline-start: 0;
-		}
-
-	}
-    .number-item {
-        text-align: center;
-        font-size: 14px;
-    }
-}
-</style>

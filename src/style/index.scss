@@ -1,0 +1,39 @@
+@import './variables';
+
+.scroll-numbers {
+    display: inline-block;
+    font-size: 0;
+    .digit {
+        display: inline-block;
+        vertical-align: text-bottom;
+        font-size: 14px;
+        text-align: center;
+    }
+}
+
+.scroll-number {
+	display: inline-block;
+	position: relative;
+	width: 15px;
+	height: 30px;
+	overflow: hidden;
+
+	.scroll-list {
+		position: absolute;
+		width: 100%;
+		transition: transform $transition-time $transition-timing-function;
+
+		ul {
+			margin: 0;
+			padding: 0;
+			list-style: none;
+			margin-block-start: 0;
+			margin-block-end: 0;
+			padding-inline-start: 0;
+		}
+	}
+	.number-item {
+		text-align: center;
+		font-size: 14px;
+	}
+}
