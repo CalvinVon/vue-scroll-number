@@ -9,9 +9,9 @@
 中文文档 | [English](README_en.md)
 
 ## Demos
-- [效果预览](https://xvltz.csb.app/)
-- [工程化用法](https://codesandbox.io/s/vue-scroll-number-xvltz)
-- [CDN用法](https://jsbin.com/romunor/edit?html,output)
+- [效果预览](https://rg41j.csb.app/)
+- [工程化用法](https://codesandbox.io/s/vue-scroll-number-rg41j)
+- [CDN用法](https://jsbin.com/jupovediwu/1/edit?js,output)
 
 # Table of contents
 - [开始](#开始)
