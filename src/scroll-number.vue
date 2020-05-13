@@ -22,6 +22,7 @@
 /**
  * ScrollNumber
  * @prop {number|string} value input number value
+ * @prop {Boolean} numberOnly whether allow number input only
  * @prop {number} transitionTime animation transition time
  * @prop {object} itemStyle css style of each number item
  * 
@@ -43,8 +44,11 @@ export default {
 	props: {
 		value: {
 			type: [Number, String],
-			default: 0,
-			validator: isNumber
+			default: 0
+		},
+		numberOnly: {
+			type: Boolean,
+			default: () => getOptions().numberOnly
 		},
 		transitionTime: {
 			type: Number,
@@ -64,14 +68,22 @@ export default {
 	computed: {
 		numbers() {
 			return this.getNumbers(this.innerValue);
-		}
+		},
 	},
 	watch: {
 		value(newV) {
 			this.changeTo(newV);
 		},
 		innerValue(newV, oldV) {
-			if (Math.abs(newV) > Math.abs(oldV)) {
+			let compareFn;
+			if (isNumber(this.value)) {
+				compareFn = (a, b) => Math.abs(newV) > Math.abs(oldV);
+			}
+			else {
+				compareFn = (a, b) => newV > oldV;
+			}
+
+			if (compareFn(newV, oldV)) {
 				this.direction = DIRECTIONS.FORWARD;
 			}
 			else {
@@ -84,7 +96,7 @@ export default {
 	},
 	methods: {
 		changeTo(value) {
-			if (!isNumber(value)) {
+			if (this.numberOnly && !isNumber(value)) {
 				console.warn('[vue-scroll-number]: You can only change value to a number');
 				return Promise.reject();
 			}

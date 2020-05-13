@@ -18,6 +18,7 @@
     - [安装](#安装)
 - [用法](#用法)
     - [基本用法](#基本用法)
+    - [全局配置](#全局配置)
     - [定制样式](#定制样式)
     - [动画顺序控制](#动画顺序控制)
 - [ScrollNumber 组件](#ScrollNumber-组件)
@@ -98,15 +99,20 @@ export default {
 }
 </script>
 ```
-
-### 定制样式
+### 全局配置
 可全局配置 **ScrollNumber** 组件的行为
 ```js
-// 将动画时间设为 400 ms
-Vue.use(ScrollNumber, { transitionTime: 400 });
+Vue.use(ScrollNumber, {
+    // 动画渐变时间
+    transitionTime: 800,
+    // 是否只允许使用数字类型（v1.1.0新增）
+    numberOnly: false
+});
 ```
 
-同时需要覆盖内置的样式，新建一个如 `custom-variables.scss` 的文件：
+
+### 定制样式
+**vue-scroll-number** 使用 SCSS 编写，如果你的项目也使用了 SCSS，那么可以直接在项目中改变内置的样式变量。新建一个如 `custom-variables.scss` 的文件：
 ```scss
 $font-size: 24px;
 $transition-time: 0.4s;
@@ -116,7 +122,7 @@ $transition-timing-function: cubic-bezier(0.22, 0.61, 0.36, 1);
 @import '~vue-scroll-number/src/style/index.scss';
 ```
 
-在入口文件引入：
+在入口文件引入。`transitionTime` 动画渐变时间需要单独（全局或者[组件传入](#prop-transitionTime)）设置：
 ```js
 import ScrollNumber from 'vue-scroll-number';
 import './custom-variables.scss';

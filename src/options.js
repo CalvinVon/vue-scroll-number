@@ -1,5 +1,6 @@
 const options = {
     transitionTime: 800,
+    numberOnly: false
 };
 
 function setOptions(opts) {
