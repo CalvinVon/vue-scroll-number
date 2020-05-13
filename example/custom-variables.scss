@@ -1,8 +1,8 @@
 // custom styles
 
-// $font-size: 24px;
+$font-size: 150px;
 $transition-time: 0.4s;
-// $transition-timing-function: cubic-bezier(0.22, 0.61, 0.36, 1);
+$transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 
 @import '../src/style/variables.scss';
 @import '../src/style/index.scss';

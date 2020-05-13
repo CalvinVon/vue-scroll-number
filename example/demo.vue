@@ -2,8 +2,7 @@
     <div class="app">
         <h1>vue-scroll-number</h1>
         <ScrollNumber ref="scrollNumber"
-                      :value="value"
-                      :itemStyle="{ fontSize: '120px' }" />
+                      :value="value" />
 
         <h3>Open console panel to see what happened</h3>
         <br>
