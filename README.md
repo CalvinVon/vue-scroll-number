@@ -48,9 +48,10 @@ yarn add vue-scroll-number
 > 先决条件：该方式必须先要引入完整 `Vue`，或者在 `window` 对象上暴露出 `Vue` 构造函数。
 ```html
 <!-- 首先要引入 Vue -->
-<!-- 可以在 `window.Vue` 中拿到 `Vue` 构造函数 -->
 <script src="https://cdn.jsdelivr.net/npm/vue@2.6.10/dist/vue.js"></script>
 
+<!-- 引入样式 -->
+<link ref="stylesheet" href="https://cdn.jsdelivr.net/npm/vue-scroll-number/dist/vue-scroll-number.css">
 <!-- 引入 vue-scroll-number -->
 <script src="https://cdn.jsdelivr.net/npm/vue-scroll-number/dist/vue-scroll-number.min.js"></script>
 <script>
