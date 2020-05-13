@@ -1,0 +1,7 @@
+/*!
+ * vue-scroll-number v1.0.0-beta.3
+ * (c) 2020 Calvin Von
+ * Released under the MIT License.
+ */
+.scroll-number{display:inline-block;font-size:0}.scroll-number .digit{display:inline-block;vertical-align:text-bottom;font-size:14px;text-align:center}.scroll-number-item{display:inline-block;position:relative;width:15px;height:30px;overflow:hidden}.scroll-number-item .scroll-list{position:absolute;width:100%;transition:transform .8s ease}.scroll-number-item .scroll-list ul{margin:0;padding:0;list-style:none;margin-block-start:0;margin-block-end:0;padding-inline-start:0}.scroll-number-item .number-item{text-align:center;font-size:14px}
+
