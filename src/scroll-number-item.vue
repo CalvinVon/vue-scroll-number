@@ -40,6 +40,17 @@
 </template>
 
 <script>
+/**
+ * ScrollNumberItem
+ * @prop {'FORWARD'|'BACKWARD'} direction animation direction
+ * @prop {number} transitionTime animation transition time
+ * @prop {object} itemStyle css style of each number item
+ * 
+ * @member {Promise<number>} process a promise instance of animation process
+ * @method changeTo(value):Promise trigger to change the value
+ * @method forwardTo(value):Promise trigger to change the value forward
+ * @method backwardTo(value):Promise trigger to change the value backward
+ */
 import { getOptions } from './options';
 const DIRECTIONS = {
     'FORWARD': 'FORWARD',

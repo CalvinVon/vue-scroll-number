@@ -6,38 +6,32 @@
 [![](https://img.shields.io/github/size/CalvinVon/vue-scroll-number/dist/vue-scroll-number.min.js.svg?label=minified%20size)](https://github.com/CalvinVon/vue-scroll-number/blob/master/dist/vue-scroll-number.min.js)
 [![dependencies](https://img.shields.io/david/CalvinVon/vue-scroll-number.svg)](https://www.npmjs.com/package/vue-scroll-number)
 
-[中文文档](README_zh.md) | English
+中文文档 | [English](README_en.md)
 
 ## Demos
 - [效果预览](https://xvltz.csb.app/)
 - [工程化用法](https://codesandbox.io/s/vue-scroll-number-xvltz)
-- [CDN用法](https://jsbin.com/hojadorago/1/edit?html,js,output)
+- [CDN用法](https://jsbin.com/romunor/edit?html,output)
 
 # Table of contents
 - [开始](#开始)
     - [安装](#安装)
 - [用法](#用法)
     - [基本用法](#基本用法)
-    - [高级用法](#高级用法)
-- [全局配置项](#全局配置项)
-    - [target](#target)
-    - [mode](#mode)
-    - [root](#root)
-    - [rootOptions](#rootOptions)
-    - [props](#props)
-    - [data](#data)
-    - [on](#on)
-- [实例方法](#实例方法)
-    - [getInstance(MountOptions)](#getInstanceMountOptions)
-    - [mount(MountOptions)](#mountMountOptions)
-    - [set(MountDataOptions)](#setMountDataOptions)
-    - [destroy()](#destroy)
-    - [getDom()](#getDom)
-- [在组件上添加的方法](#在组件上添加的方法)
-    - [$getMount()](#getMount)
-- [已知的问题](#已知的问题)
-    - [无法访问到 `$router`/`$store`](#无法访问到-routerstore)
-- [CHANGELOG](#CHANGELOG)
+    - [定制样式](#定制样式)
+    - [动画顺序控制](#动画顺序控制)
+- [ScrollNumber 组件](#ScrollNumber-组件)
+    - [prop: `value`](#prop:-value)
+    - [prop: `itemStyle`](#prop:-itemStyle)
+    - [prop: `transitionTime`](#prop:-transitionTime)
+    - [method: `changeTo`](#method:-changeTo)
+    - [event: `change`](#event:-change)
+- [ScrollNumberItem 组件](#ScrollNumberItem-组件)
+    - [prop: `itemStyle`](#prop:-itemStyle)
+    - [prop: `transitionTime`](#prop:-transitionTime)
+    - [method: `changeTo`](#method:-changeTo)
+    - [method: `forwardTo`](#method:-forwardTo)
+    - [method: `backwardTo`](#method:-backwardTo)
 
 # 开始
 ### 安装
@@ -60,7 +54,10 @@ yarn add vue-scroll-number
 <!-- 引入 vue-scroll-number -->
 <script src="https://cdn.jsdelivr.net/npm/vue-scroll-number/dist/vue-scroll-number.min.js"></script>
 <script>
+    var Vue = window['Vue'];
     var VueScrollNumber = window['VueScrollNumber'].default;
+
+    Vue.use(VueScrollNumber);
 </script>
 ```
 
@@ -101,7 +98,7 @@ export default {
 </script>
 ```
 
-### 定制选项
+### 定制样式
 可全局配置 **ScrollNumber** 组件的行为
 ```js
 // 将动画时间设为 400 ms
@@ -127,225 +124,154 @@ Vue.use(ScrollNumber, { transitionTime: 400 });
 ```
 
 ### 动画顺序控制
-**vue-scroll-number** 将自动缓冲每一次变化，并用流畅的动画按顺序表现出来。
+**vue-scroll-number** 将自动缓冲每一次变化指令，并用流畅的动画**按先后顺序**表现出来。
 
-在代码中，每一次改变状态（或者调用方法）都将返回一个 `Promise` 对象，并保存在组件的 `process` 属性值上。
+在代码中，每一次改变状态（或者调用方法）都将返回一个 `Promise` 对象，并保存在组件的 `process` 属性值上。当返回的 `Promise` 对象转变成 `fulfilled` 状态时，当前的动画已经结束。
+
+> 尝试下面的代码，无论调用多少次 `runWithValue` 或者 `runWithApi` 方法，动画仍会桉顺序展现。
+```js
+const scrollNumber = this.$refs.scrollNumber;
+...
+// generate random number
+function generateValue() {
+    const random = val => Math.random() > 0.5 ? val : '';
+    const num = () => +[...new Array((Math.random() * 5 >> 0) + 1).keys()]
+        .map(() => Math.random() * 9 >> 0)
+        .join('');
+    return +random('-') + num() + random('.' + num());
+}
+
+function runWithValue() {
+    const series = [...new Array(5).keys()].map(generateValue);
+    console.log(series);
+    let index = 0;
+    const run = () => {
+        const value = series[index++];
+        console.log('Run value: ' + value);
+        this.value = value;
+        if (index !== series.length) {
+            scrollNumber.process
+                .then(run);
+        }
+    };
+    run();
+}
+
+function runWithApi() {
+    const series = [...new Array(5).keys()].map(generateValue);
+    console.log(series);
+    series.forEach((value, index) => {
+        scrollNumber
+            .changeTo(value)
+            .then(() => console.log(`Complete to change value ${value} with index ${index}`));
+    });
+}
+```
+
 ####
 ---
 
-# MountOption 配置项
-## **`target`**
-- **类型:** { string | **Element** | **Vue** | **VNode** }
-- **默认值:** `new`
-- **说明:** 你可以传入 `css selector`, `Element`, `Vue instance`, `VNode` 或者是包括 `new` 和 `root` 的特殊预设值。
-    - **`new`:** 默认特殊预设值. Vue 组件实例会被挂载到一个**新创建的 Vue 根实例**上。
-    - **`root`:** Vue 组件实例将被挂载到**现有的 Vue 根实例**上。 *如果在 `MountOption.root` 选项下找不到根实例或根元素，组件实例将被挂载到一个新的 Vue 根实例上，其行为将与选项 `new` 相似*。
-    - 当传入一个 `Vue 实例对象` 时，新的组件实例将会**替换/追加到**传入的实例（具体参见 [`MountOption.mode`](#mode) 配置），并且在 Vue 组件树上更新。 当新的组件实例挂载时，传入的实例将会被销毁。
-- **用例:**
-    ```js
-    mount(Alert, { target: "root" };
-    mount(Alert, { target: "#target" };
-    mount(Alert, { target: document.querySelector('.list') };
-    mount(Alert, { target: this.$refs.component };
-    mount(Alert, { target: this.$refs.component.$slots.default[0] };
-    ```
+# **ScrollNumber** 组件
+## prop: **`value`**
+- **类型:** { string | number }
+- **默认值:** `0`
+- **说明:** `value` 为受控属性，组件会根据 `value` 值变化自动触发动画。每次动画进程的 `Promise` 实例将会更新在组件的 `process` 属性上
     
-> **特别注意**：当配置为 `new` 时，挂载的组件无法访问到创建根实例时传入的配置，导致在挂载的组件内无法访问 `this.$router` 等在根组件上全局注册的配置（原因是创建了一个新的根实例，但是存在[替代方案](#无法访问到-routerstore)）；其他情况下，`vue-scroll-number` 会自动查询并加入组件树上下文。
-
-
-## **`mode`**
-- **类型:** { string }
-- **默认值:** `replace`
-- **备选项:** `replace`, `append`
-- **说明:** 指定挂载方式：`替换` 和 `追加` 模式。对应到其组件树上的行为。
 - **用例:**
-    ```js
-    // Alert 组件实例将会被追加挂载到当前组件（this）上。
-    mount(Alert, { 
-        target: this,
-        mode: 'append'
-    });
+    ```html
+    <template>
+        <ScrollNumber :value="value" ref="scrollNumber">
+    </template>
+    <script>
+        ...
+        this.value = 123;
+        this.$refs.scrollNumber.process.then(val => {
+            console.log('Animation complete with value: ' + val);
+        });
+    </script>
+    ```
+> 一般不与 `changeTo` 方法配合使用，请查阅 [method: **changeTo**](#method:-changeTo)
+
+
+## prop: **`itemStyle`**
+- **类型:** { object }
+- **默认值:** `缺省`
+- **说明:** 自定义每一个滚动数字项的样式
+
+
+## prop: **`transitionTime`**
+- **类型:** { number }
+- **默认值:** `800`
+- **说明:** 定义动画的渐变时长，可覆盖全局配置。一般只在自定义动画时使用，查阅[定制样式](#定制样式)
+
+
+## method: **`changeTo`**
+- **参数:** { string | number }
+- **返回值:** `Promise<string|number>`
+- **说明:** 直接在组件上调用，触发内部状态变更和动画，返回动画进程的 `Promise` 实例
+
+> **注意**：一般不建议和 `value` 属性配合使用，因为 `changeTo` 手动触发状态变更而不会更新 `value` 参数，而导致内外状态不一致；若捕捉组件 `change` 的事件来变更 `value` 值，则在特定情况下（在一个动画周期内调用多次）将会导致无限的状态变更和动画循环。
+    
+- **用例:**
+    ```html
+    <template>
+        <ScrollNumber ref="scrollNumber">
+    </template>
+    <script>
+        ...
+        this.$refs.scrollNumber.process.then(val => {
+            console.log('Animation complete with value: ' + val);
+        });
+    </script>
     ```
 
-> 值得注意的是：当配置项 `target` 值为 `new` 或者 `root` 时，`mode` 将被忽略并重置成 `append`。
-
-
-## **`root`**
-- **类型:** { string | **Element** | **Vue** }
-- **默认值:** `#app`
-- **说明:** 指定当前应用的根元素.(所有给出的值在内部都将被解析为HTML元素)。
-
-## **`rootOptions`**
-- **类型:** { VueOptions }
-- **默认值:** `{}`
-- **说明:** 允许指定在创建新的 Vue 根实例时的构造选项。
-- **用例:**
-    ```js
-    mount(Alert, {
-        rootOptions: {
-            data: {
-                root: 'new root instance'
-            },
-            methods: { ... },
-            ...
-        }
-    };
-    ```
-
-## **`props`**
-- **类型:** { Object }
-- **说明:** 指定传入组件的 props 值。
-
-## **`data`**
-- **类型:** { Object }
-- **说明:** 指定的值将会在实例创建完毕（也可能未挂载）时修改组件内部响应式数据。
-
-## **`on`**
-- **类型:** { [event: string]: Function | Object }
-- **说明:** 将事件侦听器附加到组件实例。
-    - **内置** 事件:
-        - `mount:mount`: 在调用 `mount` 方法或准备挂载组件时触发。
-        - `mount:destroy`: 触发​​何时（底层）调用 `destroy` 方法
-    - 当传入**配置对象**:
-        - `once` { Boolean }: 是否在第一次触发时删除侦听器（只触发一次）。
-        - `handler` { Function }: 事件触发回调函数.与 Vue 的事件回调函数 ([vm.$on/$once](https://vuejs.org/v2/api/index.html#vm-on))相比，会在参数列表后追加两个辅助参数，`当前组件实例` 和 `当前 Mount 实例`。
-
-        > 回调函数的 `this` 指向为**当前的 Mount 实例**，当然你可以使用**箭头函数**来避免这一行为。
-- **用例:**
-    ```js
-    mount(Alert, {
-        on: {
-            'mount:mount'(vm, mnt) {
-                console.log('mount:mount');
-                vm.doSomething();
-            },
-            'mount:destroy'() {
-                console.log('mount:destroy')
-            },
-            remove: {
-                once: true,
-                handler: (vm, mnt) => {
-                    console.log('remove');
-                }
-            },
-            'remove-with-data'(...args) {
-                console.log(args);
-            }
-        }
-    })
-    ```
-
-## **`watch`**
-- **类型:** { [key: string]: Function | Object }
-- **说明:** 一个对象，键是需要观察的表达式，值是对应回调函数。值也可以是方法名，或者包含选项的对象。
-    - 当传入**配置对象**:
-        - `immediate` { Boolean }: Passing in `immediate: true` in the option will trigger the callback immediately with the current value of the expression.
-        - `deep` { Boolean }: 为了发现对象内部值的变化，可以在选项参数中指定 deep: true 。注意监听数组的变动不需要这么做。
-        - `handler` { Function }: 值更改时的回调函数。与 Vue 的回调函数（[vm.$watch](https://vuejs.org/v2/api/index.html#vm-watch)）相比，此回调函数通常有4个参数，如：newValue、oldValue、vm、mnt。最后两个辅助参数是：`当前组件实例` 和 `当前 Mount 实例`。
-
-        > 回调函数的 `this` 指向为**当前的 Mount 实例**，当然你可以使用**箭头函数**来避免这一行为。
-    - **Unwatch**: 传给 `watch` 选项每个键都将添加到 Mount 实例的属性 `unwatchMapper` 中，您可以调用类似 `mnt.unwatchMapper.attr()` 的方法来取消监听。
-- **用例:**
-    ```js
-    mount(Alert, {
-        watch: {
-            otherAttr(newV) {
-                console.log(newV);
-            }
-            attr: {
-                handler(newValue, oldValue, vm, mnt) {
-                    console.log(args);
-                    // 取消 watch
-                    // 当 `immediate` 为 true 时，需要确保取消函数存在
-                    if (mnt.unwatchMapper.content) {
-                        mnt.unwatchMapper.content();
-                    }
-                },
-                immediate: true,
-            },
-        }
-    })
-    ```
-> 注意：只有在 `data` 选项中**提前声明数据**，值变化时监听回调函数才能被正常调用。
-
-
-
+## event: **`change`**
+- **参数:** { string | number }
+- **说明:** 当内部状态变更后且动画已结束，并在 `process` 的状态 `fulfilled` 前，发出 `change` 事件
 ---
 
+# **ScrollNumberItem** 组件
+ScrollNumberItem 组件是 ScrollNumber 组件的最小组成单位，负责单个数位上的动画，也可单独使用，但往往需要更多的计算和手动控制。
 
-# 实例方法
-## **`getInstance(MountOptions)`**
-- **参数:** { MountOptions }
-- **返回:** { Vue }
-- **说明:** 返回一个 vue 组件实例。多次调用该方法只会创建实例一次，且将返回相同的实例。
-> 注意：当选项 `target` 的值是 `root`, 且没有找到根实例/元素时（这种情况将导致*创建一个新的 Vue 根实例*）或者当值为 `new` 时，两种情况都将导致组件实例会被立即挂载。
+`vue-scroll-number` 包中也导出了该组件。
+```js
+import Vue from 'vue';
+import { ScrollNumber, ScrollNumberItem, DIRECTIONS } from 'vue-scroll-number';
 
-> 值得注意：为了确保行为一致性，推荐优先使用 [`#mount`](#mountMountOptions) 方法。
+Vue.component(ScrollNumberItem.name, ScrollNumberItem);
+// Vue.component(ScrollNumber.Item.name, ScrollNumber.Item);
+```
 
-## **`mount(MountOptions)`**
-- **参数:** { MountOptions }
-- **返回:** { Vue }
-- **说明:** 挂载 Vue 组件、更新组件树并返回 Vue 组件实例。
-> 若在组件已被 `destroy` 之后再次调用该方法将重新装载该组件（你可以认为 mount 实例为组件工厂）。
-
-> 多次调用该方法只会挂载实例一次，且将返回相同的实例。
-
-
-## **`set(MountDataOptions)`**
-- **参数:** { MountDataOptions }
-- **返回:** { Mount } 当前 `Mount` 实例。
-- **说明:** 动态设置组件实例的 `props`、 `data` 和 `listeners`。
-
-## **`destroy()`**
-- **返回:** { Vue }
-- **说明:** 销毁 Vue 组件实例并删除关联的元素，并更新组件树。与 Vue 的 [$destroy](https://cn.vuejs.org/v2/api/#vm-destroy) 方法不同，销毁整个组件与其 DOM。
-
-## **`getDom()`**
-- **返回:** { Element | Node }
-- **说明:** 返回组件实例相关联的 DOM。
+## prop: **`direction`**
+- **类型:** { 'FORWARD' | 'BACKWARD' }
+- **默认值:** `缺省`
+- **说明:** 给定数值变化时动画的方向
 
 
----
+## prop: **`itemStyle`**
+- **类型:** { object }
+- **默认值:** `缺省`
+- **说明:** 自定义滚动数字项的样式
 
-# 在组件上添加的方法
-## **`$getMount()`**
-- **返回:** { VueScrollNumber }
-- **说明:** 返回组件实例相关联的 VueScrollNumber 实例。
 
----
+## prop: **`transitionTime`**
+- **类型:** { number }
+- **默认值:** `800`
+- **说明:** 定义动画的渐变时长，可覆盖全局配置。一般只在自定义动画时使用，查阅[定制样式](#定制样式)
 
-# 已知的问题
-## 无法访问到 `$router`/`$store`
 
-- 当 VueScrollNumber 将组件挂载到**新的 Vue 根实例**上时，该组件将无法获取到在原根组件配置的 `$router`/`$store` 等属性（[原因](#target)），当然也有以下方式来解决该问题。
+## method: **`changeTo`**
+- **参数:** { string | number }
+- **返回值:** `Promise<string|number>`
+- **说明:** 直接在组件上调用，触发内部状态变更和动画，返回动画进程的 `Promise` 实例。动画的方向和传入的 `direction` 参数相关
 
-    ```js
-    mount(Component, {
-        ...
-        data: {
-            $store: this.$store,
-            // 为什么不是 $router? VueRouter 在内部使用了 Object.defineProperty 方法并只设置了 getter 属性，故在该组件无法覆盖这个值
-            router: this.$router,
-            ...
-        },
-        ...
-    });
-    ```
-    随后可在组件内部使用 `this.$store`/`this.router` 来得到该值。
 
-- 当组件已经挂载在原根实例上，但在组件的 `created`/`mounted` 等生命周期内获取不到该值时，需要使用 VueScrollNumber [内置的事件](#on) 来解决：
-    ```js
-    mount(Component, {
-        ...
-        on: {
-            'mount:mount'(vm) {
-                vm.$router;
-                vm.$store;
-            }
-        },
-        ...
-    }
-    ```
-    原因是现版本 VueScrollNumber 在内部统一在组件挂载之后才计算父组件取值。
----
-# [CHANGELOG](./CHANGELOG.md)
+## method: **`forwardTo`**
+- **参数:** { string | number }
+- **返回值:** `Promise<string|number>`
+- **说明:** 直接在组件上调用，触发内部状态变更和动画，返回动画进程的 `Promise` 实例。动画将往上变动至给定值
+
+## method: **`backwardTo`**
+- **参数:** { string | number }
+- **返回值:** `Promise<string|number>`
+- **说明:** 直接在组件上调用，触发内部状态变更和动画，返回动画进程的 `Promise` 实例。动画将往下变动至给定值

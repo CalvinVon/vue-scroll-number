@@ -8,6 +8,7 @@ ScrollNumber.install = function (Vue, options) {
     Vue.component(ScrollNumber.name, ScrollNumber);
 };
 
+ScrollNumber.Item = ScrollNumberItem;
 export default ScrollNumber;
 export {
     ScrollNumber,
