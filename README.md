@@ -24,14 +24,14 @@
     - [prop: `value`](#prop-value)
     - [prop: `itemStyle`](#prop-itemStyle)
     - [prop: `transitionTime`](#prop-transitionTime)
-    - [method: `changeTo`](#method:-changeTo)
-    - [event: `change`](#event:-change)
+    - [method: `changeTo`](#method-changeTo)
+    - [event: `change`](#event-change)
 - [ScrollNumberItem 组件](#ScrollNumberItem-组件)
     - [prop: `itemStyle`](#prop-itemStyle)
     - [prop: `transitionTime`](#prop-transitionTime)
-    - [method: `changeTo`](#method:-changeTo)
-    - [method: `forwardTo`](#method:-forwardTo)
-    - [method: `backwardTo`](#method:-backwardTo)
+    - [method: `changeTo`](#method-changeTo)
+    - [method: `forwardTo`](#method-forwardTo)
+    - [method: `backwardTo`](#method-backwardTo)
 
 # 开始
 ### 安装
@@ -190,7 +190,7 @@ function runWithApi() {
         });
     </script>
     ```
-> 一般不与 `changeTo` 方法配合使用，请查阅 [method: **changeTo**](#method:-changeTo)
+> 一般不与 `changeTo` 方法配合使用，请查阅 [method: **changeTo**](#method-changeTo)
 
 
 ## prop: **`itemStyle`**
