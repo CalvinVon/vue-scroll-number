@@ -3,7 +3,10 @@ import demo from './demo';
 import ScrollNumber from '../src';
 import './custom-variables.scss';
 
-Vue.use(ScrollNumber, { transitionTime: 400 });
+Vue.use(ScrollNumber, {
+    transitionTime: 400,
+    numberOnly: true
+});
 
 new Vue({
     render: h => h(demo)

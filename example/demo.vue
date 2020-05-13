@@ -3,7 +3,8 @@
 		<h1>vue-scroll-number</h1>
 		<ScrollNumber ref="scrollNumber"
 					  @change="handleChange"
-					  :value="value" />
+					  :value="value"
+					  numberOnly />
 
 		<h3>Open console panel to see what happened</h3>
 		<br>
@@ -19,7 +20,7 @@ export default {
 	name: "app",
 	data() {
 		return {
-			value: 10
+			value: '10:42'
 		}
 	},
 	methods: {
