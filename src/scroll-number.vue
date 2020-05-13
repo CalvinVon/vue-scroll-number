@@ -108,14 +108,13 @@ export default {
         // get index
         // except the non-number chars
         getIndex(numbers, index) {
-            // let nonNumCount = 0;
-            // for (let i = 0; i < index; i++) {
-            //     if (!isNumber(numbers[i])) {
-            //         nonNumCount++;
-            //     }
-            // }
-            // return index - nonNumCount;
-            return Date.now() + Math.random().toString(16);
+            let nonNumCount = 0;
+            for (let i = 0; i < index; i++) {
+                if (!isNumber(numbers[i])) {
+                    nonNumCount++;
+                }
+            }
+            return index - nonNumCount;
         }
     },
 };

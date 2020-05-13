@@ -180,10 +180,14 @@ export default {
         },
 
         nextFrame(cb) {
-            requestAnimationFrame(cb);
+            this.$nextTick(() => {
+                setTimeout(cb, 1000 / 60);
+            });
         },
         nextTransition(cb) {
-            setTimeout(cb, this.transitionTime);
+            this.nextFrame(() => {
+                setTimeout(cb, this.transitionTime);
+            });
         },
         calcItemSize() {
             this.itemSize = this.$refs.realList.querySelector('span').getBoundingClientRect();
