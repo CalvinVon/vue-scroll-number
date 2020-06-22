@@ -5,7 +5,7 @@ import './custom-variables.scss';
 
 Vue.use(ScrollNumber, {
     transitionTime: 400,
-    numberOnly: true
+    numberOnly: false
 });
 
 new Vue({
